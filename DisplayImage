@@ -1,0 +1,116 @@
+/**
+ * @DisplayImage
+ * @Author Amit Kumar Jaiswal
+ *@function imquantize
+ *@inputargument is the I_image
+ *@levels is an array of threholds
+ *@outputargument is the image "quantizedImage"
+ * with quantized levels. 
+ 
+ Mat imquantize(Mat I_image,vector<vector<int> > levels)
+{     
+    //Initialise output label matrix
+    Mat quantizedImage(I_image.size(),I_image.type(),Scalar::all(1));    
+
+    //Apply labels to the pixels according to the thresholds
+    for(int i=0;i<I_image.cols;i++)
+    {
+        for(int j=0;j<I_image.rows;j++)
+        {
+            // To Check whether image is Grayscale or BGR
+            if(levels.size()==1)
+            {
+                for(int k=0;k<levels[0].size();k++) 
+                {
+                    // if Pixel<lowest threshold, then assign 0
+                    if(I_image.at<uchar>(j,i)<= levels[0][0])
+                    { 
+                        quantizedImage.at<uchar>(j,i) = 0;
+                    }
+
+                    // if pixel>highest threshold , then assign 255
+                    else if(I_image.at<uchar>(j,i)>=levels[0][levels[0].size()-1]) 
+                    { 
+                        quantizedImage.at<uchar>(j,i) = 255;
+                    }
+
+                    // Check the level borders for pixel and assign the corresponding
+                    // upper bound quanta to the pixel
+                    else
+                    { 
+                        if(levels[0][k]<I_image.at<uchar>(j,i)&&I_image.at<uchar>(j,i)<=levels[0][k+1])
+                        {
+                            quantizedImage.at<uchar>(j,i) = (k+1)*255/(levels[0].size());
+                        }
+                    }
+                }
+            }
+
+            else
+            {
+                Vec3b pair=I_image.at<Vec3b>(j,i); 
+
+                // Processing the Blue Channel
+                for(int k=0;k<levels[0].size();k++) 
+                {
+                    if(pair.val[0]<=levels[0][0]) 
+                    {
+                        quantizedImage.at<Vec3b>(j,i)[0]=0;
+                    }
+                    else if(pair.val[0]>=levels[0][levels.size()-1])
+                    {
+                        quantizedImage.at<Vec3b>(j,i)[0] = 255; 
+                    } 
+                    else
+                    {
+                        if(levels[0][k]<pair.val[0]&&pair.val[0]<=levels[0][k+1]) 
+                        {
+                            quantizedImage.at<Vec3b>(j,i)[0]=(k+1)*255/(levels[0].size());
+                        }
+                    }
+                }
+
+                // Processing the Green Channel
+                for(int k=0;k<levels[1].size();k++) 
+                {
+                    if(pair.val[1]<=levels[1][0]) 
+                    {
+                        quantizedImage.at<Vec3b>(j,i)[1]=0;
+                    }
+                    else if(pair.val[1]>=levels[1][levels.size()-1])
+                    {
+                        quantizedImage.at<Vec3b>(j,i)[1]=255; 
+                    } 
+                    else
+                    {
+                        if(levels[1][k]<pair.val[1]&&pair.val[1]<=levels[1][k+1]) 
+                        {
+                            quantizedImage.at<Vec3b>(j,i)[1]=(k+1)*255/(levels[1].size());
+                        }
+                    }   
+                }
+
+                // Processing the Red Channel
+                for (int k=0;k<levels[2].size();k++) 
+                {
+                    if(pair.val[2]<=levels[2][0])
+                    {
+                        quantizedImage.at<Vec3b>(j,i)[2] = 0;
+                    }
+                    else if( pair.val[2] >= levels[2][levels.size()-1])
+                    {
+                        quantizedImage.at<Vec3b>(j,i)[2] = 255; 
+                    } 
+                    else
+                    {
+                        if(levels[2][k] < pair.val[2] && pair.val[2] <= levels[2][k+1]) 
+                        {
+                            quantizedImage.at<Vec3b>(j,i)[2] = (k+1)*255/(levels[2].size());
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return quantizedImage;
+}
